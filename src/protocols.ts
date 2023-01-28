@@ -29,6 +29,17 @@ export type RequestError = {
   message: string,
 };
 
-export type TicketTypeId= {
+export type TicketTypeId = {
   ticketTypeId: number
+};
+
+export type NewPaymentBody = {
+  ticketId: number,
+  cardData: {
+    issuer: string,
+    number: string,
+    name: string,
+    expirationDate: string,
+    cvv: string
+  }
 };
