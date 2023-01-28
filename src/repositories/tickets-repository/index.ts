@@ -1,40 +1,57 @@
 import { prisma } from "@/config";
 
 
-async function findAllTicketsTypes(){
+async function findAllTicketsTypes() {
     return prisma.ticketType.findMany();
 }
 
-async function findTicketFromEnrrolement(enrollmentId: number){
+async function findTicketFromEnrrolement(enrollmentId: number) {
     return prisma.ticket.findFirst({
-        where:{enrollmentId},
-        select:{
-            id:true,
-            status:true,
-            ticketTypeId:true,
-            enrollmentId:true,
-            TicketType:true,
-            createdAt:true,
-            updatedAt:true
+        where: { enrollmentId },
+        select: {
+            id: true,
+            status: true,
+            ticketTypeId: true,
+            enrollmentId: true,
+            TicketType: true,
+            createdAt: true,
+            updatedAt: true
         }
     });
 }
 
-async function createTicket(ticketTypeId: number,enrollmentId: number) {
+async function findTicketById(ticketId: number) {
+    return prisma.ticket.findUnique({
+        where: { id: ticketId },
+        select:{
+            id:true,
+            enrollmentId:true,
+            Enrollment:{
+                select:{
+                    id:true,
+                    userId:true
+                }
+            }
+        }
+    }
+    )
+}
+
+async function createTicket(ticketTypeId: number, enrollmentId: number) {
     return prisma.ticket.create({
-        data:{
+        data: {
             ticketTypeId,
             enrollmentId,
-            status:"RESERVED"
+            status: "RESERVED"
         },
-        select:{
+        select: {
             id: true,
-            status:true,
-            ticketTypeId:true,
-            enrollmentId:true,
-            TicketType:true,
-            createdAt:true,
-            updatedAt:true
+            status: true,
+            ticketTypeId: true,
+            enrollmentId: true,
+            TicketType: true,
+            createdAt: true,
+            updatedAt: true
         }
     })
 };
@@ -42,6 +59,7 @@ async function createTicket(ticketTypeId: number,enrollmentId: number) {
 const ticketsRepository = {
     findAllTicketsTypes,
     findTicketFromEnrrolement,
+    findTicketById,
     createTicket
 };
 export default ticketsRepository;
