@@ -1,4 +1,4 @@
-import { notFoundError, requestError } from "@/errors";
+import { notFoundError } from "@/errors";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import hotelRepository from "@/repositories/hotel-repository";
 import ticketRepository from "@/repositories/ticket-repository";
@@ -6,11 +6,9 @@ import ticketRepository from "@/repositories/ticket-repository";
 async function getHotels(userId: number) {
   const enrollmentUserExists = await enrollmentRepository.findWithAddressByUserId(userId);
   if (!enrollmentUserExists) throw notFoundError();
-  // console.log("PASSEI DO ERRO DO ENROLMENT NOT FOUND")
 
   const ticket = await ticketRepository.findTicketByEnrollmentId(enrollmentUserExists.id);
   if (!ticket) throw notFoundError();
-  // console.log("PASSEI DO TICKET")
 
   if (!ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
     throw { name: "BadRequestError", message: "Hotel not includes." };
@@ -20,7 +18,7 @@ async function getHotels(userId: number) {
 
   const hotels = await hotelRepository.findAllHotels();
   if (hotels.length === 0) throw notFoundError();
- 
+
   return hotels;
 
   // {

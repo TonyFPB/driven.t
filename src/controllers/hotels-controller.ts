@@ -19,10 +19,9 @@ export async function getAllHotels(req: AuthenticatedRequest, res: Response) {
     }
     if (err.name === "PaymentError") {
       res.status(httpStatus.PAYMENT_REQUIRED).send(err);
-      return
+      return;
     }
 
-    
     res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
