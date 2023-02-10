@@ -400,6 +400,48 @@ describe("PUT /booking/:bookingId", () => {
       expect(response.status).toBe(httpStatus.FORBIDDEN);
     });
 
+    it("Should respond with status 403 when booking id is not from user", async () => {
+      const user = await createUser();
+      const userWithBooking = await createUser();
+      const enrollment = await createEnrollmentWithAddress(user);
+      const token = await generateValidToken(user);
+
+      const hotel = await createHotel();
+      const roomFromUserWithBooking = await createRoom(hotel.id);
+      const bookingFromUserWithBooking = await createBooking(userWithBooking.id,roomFromUserWithBooking.id)
+
+      const room = await createRoom(hotel.id)
+
+      const ticketType = await createTicketTypeWithBool(false, true);
+      const ticket = await createTicket(enrollment.id, ticketType.id, "PAID");
+
+      const body = { roomId: room.id };
+
+      const response = await server.put(`/booking/${bookingFromUserWithBooking.id}`).set("Authorization", `Bearer ${token}`).send(body);
+
+      expect(response.status).toBe(httpStatus.FORBIDDEN);
+    });
+
+    it("Should respond with status 403 when booking id does not exists", async () => {
+      const user = await createUser();
+      const enrollment = await createEnrollmentWithAddress(user);
+      const token = await generateValidToken(user);
+
+      const hotel = await createHotel();
+      const room = await createRoom(hotel.id)
+      const fakeBooking = faker.datatype.number()
+
+      const ticketType = await createTicketTypeWithBool(false, true);
+      const ticket = await createTicket(enrollment.id, ticketType.id, "PAID");
+
+      const body = { roomId: room.id };
+
+      const response = await server.put(`/booking/${fakeBooking}`).set("Authorization", `Bearer ${token}`).send(body);
+
+      expect(response.status).toBe(httpStatus.FORBIDDEN);
+    });
+
+
     it("Should respond with status 200 with the booking id and change the room from user", async () => {
       const user = await createUser();
       const enrollment = await createEnrollmentWithAddress(user);
@@ -419,12 +461,12 @@ describe("PUT /booking/:bookingId", () => {
       const response = await server.put(`/booking/${bookingFromUser.id}`).set("Authorization", `Bearer ${token}`).send(body);
 
       const booking = await prisma.booking.findFirst({ where: { userId: user.id } });
-
+      
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body).toEqual({
         id: booking.id,
       });
-      expect(booking.roomId).toBe(roomFromUser.id)
+      expect(booking.roomId).toBe(room.id)
     });
   });
 });
